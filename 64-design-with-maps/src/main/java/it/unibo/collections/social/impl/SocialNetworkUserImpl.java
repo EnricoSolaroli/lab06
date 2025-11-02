@@ -38,6 +38,8 @@ public final class SocialNetworkUserImpl<U extends User> extends UserImpl implem
      *
      * think of what type of keys and values would best suit the requirements
      */
+    private Map<String, Set<U>> followedUsersByGroup = new HashMap<>();
+
 
     /*
      * [CONSTRUCTORS]
@@ -64,12 +66,16 @@ public final class SocialNetworkUserImpl<U extends User> extends UserImpl implem
      *            application
      */
     public SocialNetworkUserImpl(final String name, final String surname, final String user, final int userAge) {
-        super(null, null, null, 0);
+        super(name, surname, user, userAge);
     }
 
     /*
      * 2) Define a further constructor where the age defaults to -1
      */
+     public SocialNetworkUserImpl(final String name, final String surname, final String user) {
+        super(name, surname, user, -1);
+    }
+
 
     /*
      * [METHODS]
@@ -78,7 +84,8 @@ public final class SocialNetworkUserImpl<U extends User> extends UserImpl implem
      */
     @Override
     public boolean addFollowedUser(final String circle, final U user) {
-        return false;
+        final Set<U> group = this.followedUsersByGroup.computeIfAbsent(circle, k -> new HashSet<>());
+        return group.add(user);
     }
 
     /**
@@ -88,11 +95,17 @@ public final class SocialNetworkUserImpl<U extends User> extends UserImpl implem
      */
     @Override
     public Collection<U> getFollowedUsersInGroup(final String groupName) {
-        return null;
+        final Set<U> originalSet = this.followedUsersByGroup.getOrDefault(groupName, Collections.emptySet());
+        return new ArrayList<>(originalSet);
     }
 
     @Override
     public List<U> getFollowedUsers() {
-        return null;
+        final Set<U> allFollowedUsers = new HashSet<>();
+        
+        for(final Set<U> group : this.followedUsersByGroup.values()){
+            allFollowedUsers.addAll(group);
+        }
+        return new ArrayList<>(allFollowedUsers);
     }
 }
